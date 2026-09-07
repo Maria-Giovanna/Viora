@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://challenges.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; frame-src https://challenges.cloudflare.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    />
+    <title>Viora — Gerenciador de Tarefas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="icon"
+      type="image/png"
+      href="./assets/favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="./assets/favicon/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./assets/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="./assets/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <section id="auth-shell" class="auth-shell">
+      <div class="auth-decoration auth-decoration-one" aria-hidden="true"></div>
+      <div class="auth-decoration auth-decoration-two" aria-hidden="true"></div>
+      <div class="auth-card">
+        <div class="auth-brand">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="./assets/logo.svg" alt="Logo da Viora" />
+          </div>
+          <div>
+            <strong>Viora</strong>
+            <span>planeje sem se perder</span>
+          </div>
+        </div>
+
+        <div id="auth-config-warning" class="notice notice-danger" hidden>
+          <strong>O backend ainda não foi conectado.</strong><br />
+          Execute <span class="code-inline">supabase/schema.sql</span> no
+          Supabase e preencha
+          <span class="code-inline">js/supabase-config.js</span>.
+        </div>
+
+        <div id="auth-view-login" class="auth-view">
+          <p class="eyebrow">Sua conta</p>
+          <h1>Bem-vinda de volta.</h1>
+          <p class="auth-copy">
+            Seus projetos ficam associados à sua conta e protegidos por
+            autenticação e regras de acesso no banco.
+          </p>
+          <form id="login-form" class="auth-form">
+            <label class="field">
+              <span>E-mail</span>
+              <input
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="voce@exemplo.com"
+              />
+            </label>
+            <label class="field">
+              <span>Senha</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+                placeholder="Sua senha"
+              />
+            </label>
+            <div id="captcha-login" class="captcha-slot" hidden></div>
+            <div
+              id="login-message"
+              class="auth-message"
+              aria-live="polite"
+            ></div>
+            <button class="button button-primary button-full" type="submit">
+              Entrar
+            </button>
+          </form>
+          <div class="auth-links">
+            <button class="link-button" type="button" data-auth-view="forgot">
+              Esqueci minha senha
+            </button>
+            <button class="link-button" type="button" data-auth-view="signup">
+              Criar uma conta
+            </button>
+          </div>
+        </div>
+
+        <div id="auth-view-signup" class="auth-view" hidden>
+          <p class="eyebrow">Nova conta</p>
+          <h1>Crie seu espaço.</h1>
+          <p class="auth-copy">
+            Use um e-mail ao qual você tenha acesso. A confirmação por e-mail
+            deve permanecer habilitada no Supabase.
+          </p>
+          <form id="signup-form" class="auth-form">
+            <label class="field">
+              <span>Como quer ser chamada?</span>
+              <input
+                name="displayName"
+                autocomplete="name"
+                required
+                maxlength="60"
+                placeholder="Seu nome"
+              />
+            </label>
+            <label class="field">
+              <span>E-mail</span>
+              <input
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="voce@exemplo.com"
+              />
+            </label>
+            <label class="field">
+              <span>Senha</span>
+              <input
+                type="password"
+                name="password"
+                autocomplete="new-password"
+                required
+                minlength="12"
+                placeholder="Crie uma senha forte"
+              />
+            </label>
+            <label class="field">
+              <span>Confirmar senha</span>
+              <input
+                type="password"
+                name="confirmPassword"
+                autocomplete="new-password"
+                required
+                minlength="12"
+                placeholder="Repita a senha"
+              />
+            </label>
+            <p class="password-rules">
+              Use pelo menos 12 caracteres, com maiúscula, minúscula, número e
+              símbolo.
+            </p>
+            <div id="captcha-signup" class="captcha-slot" hidden></div>
+            <div
+              id="signup-message"
+              class="auth-message"
+              aria-live="polite"
+            ></div>
+            <button class="button button-primary button-full" type="submit">
+              Criar conta
+            </button>
+          </form>
+          <div class="auth-links">
+            <button class="link-button" type="button" data-auth-view="login">
+              Já tenho conta
+            </button>
+          </div>
+        </div>
+
+        <div id="auth-view-forgot" class="auth-view" hidden>
+          <p class="eyebrow">Recuperação</p>
+          <h1>Recupere sua senha.</h1>
+          <p class="auth-copy">
+            Informe seu e-mail. Por segurança, a mensagem exibida não confirma
+            se existe uma conta cadastrada.
+          </p>
+          <form id="forgot-form" class="auth-form">
+            <label class="field">
+              <span>E-mail</span>
+              <input
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="voce@exemplo.com"
+              />
+            </label>
+            <div id="captcha-forgot" class="captcha-slot" hidden></div>
+            <div
+              id="forgot-message"
+              class="auth-message"
+              aria-live="polite"
+            ></div>
+            <button class="button button-primary button-full" type="submit">
+              Enviar recuperação
+            </button>
+          </form>
+          <div class="auth-links">
+            <button class="link-button" type="button" data-auth-view="login">
+              Voltar para entrar
+            </button>
+          </div>
+        </div>
+
+        <div id="auth-view-mfa" class="auth-view" hidden>
+          <p class="eyebrow">Segundo fator</p>
+          <h1>Confirme que é você.</h1>
+          <p class="auth-copy">
+            Abra seu aplicativo autenticador e informe o código de 6 dígitos.
+            Seus dados só serão liberados pelo banco após a sessão atingir AAL2.
+          </p>
+          <form id="mfa-login-form" class="auth-form">
+            <label class="field">
+              <span>Código do autenticador</span>
+              <input
+                name="code"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                required
+                placeholder="000000"
+              />
+            </label>
+            <div
+              id="mfa-login-message"
+              class="auth-message"
+              aria-live="polite"
+            ></div>
+            <button class="button button-primary button-full" type="submit">
+              Verificar e entrar
+            </button>
+          </form>
+          <div class="auth-links">
+            <button class="link-button" id="mfa-cancel-login" type="button">
+              Cancelar e sair
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="./assets/logo.svg" alt="Logo da Viora" />
+          </div>
+          <div>
+            <strong>Viora</strong>
+            <span>planeje sem se perder</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" data-view="now">
+            <span class="icon nav-icon icon-home" aria-hidden="true"></span
+            >Agora
+          </button>
+          <button class="nav-item" data-view="projects">
+            <span class="icon nav-icon icon-projects" aria-hidden="true"></span
+            >Projetos
+          </button>
+          <button class="nav-item" data-view="tasks">
+            <span class="icon nav-icon icon-tasks" aria-hidden="true"></span
+            >Tarefas
+          </button>
+          <button class="nav-item" data-view="planning">
+            <span class="icon nav-icon icon-planning" aria-hidden="true"></span
+            >Planejamento
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button class="button button-ghost button-full" id="export-db">
+            <span class="icon icon-download" aria-hidden="true"></span>Exportar
+            JSON
+          </button>
+          <label class="button button-ghost button-full file-button">
+            <span class="icon icon-upload" aria-hidden="true"></span>Importar
+            JSON
+            <input
+              id="import-db"
+              type="file"
+              accept="application/json,.json"
+              hidden
+            />
+          </label>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Gerenciador de tarefas com dependências</p>
+            <h1 id="page-title">Agora</h1>
+          </div>
+          <div class="topbar-actions">
+            <span class="sync-status" id="sync-status" aria-live="polite"
+              >Conectando…</span
+            >
+            <button class="button button-secondary" id="new-project">
+              <span class="icon icon-plus" aria-hidden="true"></span>Projeto
+            </button>
+            <button class="button button-primary" id="new-task">
+              <span class="icon icon-plus" aria-hidden="true"></span>Tarefa
+            </button>
+            <button
+              class="user-button"
+              id="account-button"
+              type="button"
+              aria-label="Abrir configurações da conta"
+            >
+              <span class="user-avatar" id="user-avatar" aria-hidden="true"
+                >U</span
+              >
+              <span class="user-button-copy"
+                ><strong id="user-display-name">Conta</strong
+                ><small id="user-email"></small
+              ></span>
+            </button>
+          </div>
+        </header>
+
+        <section id="app-view" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <dialog id="project-dialog" class="dialog">
+      <form method="dialog" id="project-form" class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Novo projeto</p>
+            <h2>Crie um objetivo maior</h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-action="close-project-dialog"
+            aria-label="Fechar"
+          >
+            <span class="icon icon-x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <label class="field">
+          <span>Nome do projeto</span>
+          <input
+            name="name"
+            required
+            maxlength="80"
+            placeholder="Ex.: Portfólio Darkdusty"
+          />
+        </label>
+
+        <label class="field">
+          <span>Descrição <small>opcional</small></span>
+          <textarea
+            name="description"
+            rows="3"
+            placeholder="O que precisa estar pronto no final?"
+          ></textarea>
+        </label>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Data limite <small>opcional</small></span>
+            <input type="date" name="dueDate" />
+          </label>
+
+          <label class="field">
+            <span>Cor</span>
+            <select name="color">
+              <option value="purple">Roxo pastel</option>
+              <option value="blue">Azul pastel</option>
+              <option value="pink">Rosa pastel</option>
+              <option value="green">Verde pastel</option>
+              <option value="yellow">Amarelo pastel</option>
+              <option value="orange">Laranja pastel</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          <button
+            class="button button-ghost"
+            type="button"
+            data-action="close-project-dialog"
+          >
+            Cancelar
+          </button>
+          <button class="button button-primary" type="submit">
+            Criar projeto
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="task-dialog" class="dialog dialog-wide">
+      <form method="dialog" id="task-form" class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Nova tarefa</p>
+            <h2>Transforme um objetivo em algo executável</h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-action="close-task-dialog"
+            aria-label="Fechar"
+          >
+            <span class="icon icon-x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Projeto <small>opcional</small></span>
+            <select name="projectId" id="task-project"></select>
+          </label>
+          <label class="field">
+            <span>Data limite <small>opcional</small></span>
+            <input type="date" name="dueDate" />
+          </label>
+        </div>
+
+        <div class="status-preview" aria-label="Status inicial da tarefa">
+          <div>
+            <span class="status-preview-label">Status inicial</span>
+            <strong>Pendente</strong>
+          </div>
+          <p>
+            O sistema muda para <strong>Em andamento</strong> quando você
+            iniciar a tarefa. Ela só vira <strong>Concluída</strong> quando você
+            confirmar que o critério de conclusão foi atingido.
+          </p>
+        </div>
+
+        <label class="field">
+          <span>Nome da tarefa</span>
+          <input
+            name="name"
+            required
+            maxlength="100"
+            placeholder="Ex.: Criar formulário de orçamento"
+          />
+        </label>
+
+        <label class="field">
+          <span>Descrição <small>opcional</small></span>
+          <textarea
+            name="description"
+            rows="2"
+            placeholder="Contexto ou observações importantes"
+          ></textarea>
+        </label>
+
+        <fieldset class="choice-card">
+          <legend>Essa tarefa possui etapas menores para ser concluída?</legend>
+          <label
+            ><input type="radio" name="hasSteps" value="no" checked /> Não,
+            consigo executá-la diretamente</label
+          >
+          <label
+            ><input type="radio" name="hasSteps" value="yes" /> Sim, quero
+            dividi-la em partes</label
+          >
+        </fieldset>
+
+        <section id="unit-task-fields">
+          <label class="field">
+            <span>Concluída quando...</span>
+            <input
+              name="completionCriteria"
+              placeholder="Ex.: o formulário validar e enviar sem erros"
+            />
+          </label>
+
+          <div class="estimate-layout">
+            <div class="estimate-card">
+              <div class="estimate-heading">
+                <strong>Tempo estimado desta tarefa</strong>
+                <span>Somente o tempo para executá-la.</span>
+              </div>
+              <div class="duration-input">
+                <label class="duration-field">
+                  <span>Horas</span>
+                  <input
+                    type="number"
+                    min="0"
+                    name="hours"
+                    value="1"
+                    aria-label="Horas estimadas"
+                  />
+                </label>
+                <label class="duration-field">
+                  <span>Minutos</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    name="minutes"
+                    value="0"
+                    aria-label="Minutos estimados"
+                  />
+                </label>
+              </div>
+              <p class="helper">
+                Pré-requisitos não entram nesta estimativa. O planejamento soma
+                a cadeia de dependências separadamente para calcular a duração
+                projetada.
+              </p>
+            </div>
+            <label class="help-choice-card">
+              <input type="checkbox" name="doesNotKnowHowToStart" />
+              <span>
+                <strong>Não sei por onde começar</strong>
+                <small
+                  >O sistema vai sugerir que você decomponha esta tarefa em
+                  partes menores.</small
+                >
+              </span>
+            </label>
+          </div>
+
+          <div class="subsection">
+            <div class="subsection-title">
+              <div>
+                <strong>Pré-requisitos</strong>
+                <p>Selecione tarefas que precisam terminar antes desta.</p>
+              </div>
+            </div>
+            <div id="dependency-options" class="dependency-options"></div>
+            <button
+              type="button"
+              class="button button-ghost"
+              id="toggle-new-prerequisite"
+            >
+              <span class="icon icon-plus" aria-hidden="true"></span>Criar novo
+              pré-requisito
+            </button>
+            <div id="new-prerequisite-fields" class="inline-panel" hidden>
+              <label class="field">
+                <span>Nome do pré-requisito</span>
+                <input name="prerequisiteName" placeholder="Ex.: Estudar DOM" />
+              </label>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Horas</span>
+                  <input
+                    type="number"
+                    min="0"
+                    name="prerequisiteHours"
+                    value="1"
+                  />
+                </label>
+                <label class="field">
+                  <span>Minutos</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    name="prerequisiteMinutes"
+                    value="0"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span>Concluído quando...</span>
+                <input
+                  name="prerequisiteCriteria"
+                  placeholder="Ex.: exercícios básicos concluídos"
+                />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section id="steps-fields" hidden>
+          <div class="subsection-title">
+            <div>
+              <strong>Etapas da tarefa</strong>
+              <p>Cada etapa final recebe sua própria estimativa de duração.</p>
+            </div>
+            <button type="button" class="button button-ghost" id="add-step">
+              <span class="icon icon-plus" aria-hidden="true"></span>Etapa
+            </button>
+          </div>
+          <div id="steps-list" class="steps-list"></div>
+          <p class="helper">
+            Depois de salvar, você poderá organizar dependências entre essas
+            etapas na própria lista de tarefas.
+          </p>
+        </section>
+
+        <div id="decomposition-hint" class="notice notice-soft" hidden></div>
+
+        <div class="dialog-actions">
+          <button
+            class="button button-ghost"
+            type="button"
+            data-action="close-task-dialog"
+          >
+            Cancelar
+          </button>
+          <button class="button button-primary" type="submit">
+            Salvar tarefa
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dependency-dialog" class="dialog">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Dependências</p>
+            <h2 id="dependency-task-title">Organizar pré-requisitos</h2>
+          </div>
+          <button
+            class="icon-button"
+            id="close-dependency-dialog"
+            aria-label="Fechar"
+          >
+            <span class="icon icon-x" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div id="dependency-manager"></div>
+      </div>
+    </dialog>
+
+    <dialog id="confirm-dialog" class="dialog">
+      <div class="dialog-card compact-dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Confirmar ação</p>
+            <h2 id="confirm-title">Tem certeza?</h2>
+          </div>
+        </div>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button class="button button-ghost" id="confirm-cancel">
+            Cancelar
+          </button>
+          <button class="button button-danger" id="confirm-ok">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="session-end-dialog" class="dialog">
+      <div class="dialog-card compact-dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Sessão de trabalho</p>
+            <h2>Sessão encerrada</h2>
+          </div>
+          <button
+            class="icon-button"
+            id="session-close"
+            type="button"
+            aria-label="Fechar"
+          >
+            <span class="icon icon-x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="session-summary" aria-live="polite">
+          <span class="session-summary-label">Tempo registrado</span>
+          <strong class="session-duration" id="session-duration"
+            >00:00:00</strong
+          >
+          <span class="session-task-name" id="session-task-name"></span>
+        </div>
+
+        <div class="completion-criterion">
+          <span>Você definiu como concluída quando...</span>
+          <strong id="session-completion-criterion"
+            >Critério não informado.</strong
+          >
+        </div>
+
+        <p class="session-question">
+          Você atingiu esse resultado e quer concluir a tarefa agora?
+        </p>
+
+        <div class="dialog-actions session-dialog-actions">
+          <button
+            class="button button-ghost"
+            id="session-continue-later"
+            type="button"
+          >
+            Ainda não, continuar depois
+          </button>
+          <button
+            class="button button-primary"
+            id="session-complete-task"
+            type="button"
+          >
+            <span class="icon icon-check" aria-hidden="true"></span>Concluir
+            tarefa
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="account-dialog" class="dialog">
+      <div class="dialog-card">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Conta e segurança</p>
+            <h2>Seu perfil</h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-action="close-account-dialog"
+            aria-label="Fechar"
+          >
+            <span class="icon icon-x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <form id="profile-form">
+          <label class="field">
+            <span>Nome</span>
+            <input
+              name="displayName"
+              required
+              maxlength="60"
+              autocomplete="name"
+            />
+          </label>
+          <label class="field">
+            <span>E-mail</span>
+            <input name="email" type="email" readonly />
+          </label>
+          <button class="button button-secondary" type="submit">
+            Salvar nome
+          </button>
+        </form>
+
+        <div class="subsection">
+          <strong>Alterar senha</strong>
+          <p class="helper">
+            Sua senha não é armazenada pela Viora. A autenticação é processada
+            pelo Supabase Auth.
+          </p>
+          <form id="change-password-form">
+            <label class="field"
+              ><span>Senha atual</span
+              ><input
+                type="password"
+                name="currentPassword"
+                autocomplete="current-password"
+                required
+            /></label>
+            <label class="field"
+              ><span>Nova senha</span
+              ><input
+                type="password"
+                name="newPassword"
+                autocomplete="new-password"
+                minlength="12"
+                required
+            /></label>
+            <label class="field"
+              ><span>Confirmar nova senha</span
+              ><input
+                type="password"
+                name="confirmPassword"
+                autocomplete="new-password"
+                minlength="12"
+                required
+            /></label>
+            <div
+              id="account-message"
+              class="auth-message"
+              aria-live="polite"
+            ></div>
+            <button class="button button-secondary" type="submit">
+              Alterar senha
+            </button>
+          </form>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">
+            <div>
+              <strong>Autenticação em duas etapas (TOTP)</strong>
+              <p id="mfa-status" class="helper">Verificando...</p>
+            </div>
+            <button
+              class="button button-secondary"
+              id="enable-mfa-button"
+              type="button"
+            >
+              Ativar 2FA
+            </button>
+          </div>
+          <div id="mfa-factors-list" class="dependency-list"></div>
+          <div id="mfa-setup-panel" class="inline-panel" hidden>
+            <p class="helper">
+              Escaneie o QR Code com Google Authenticator, Microsoft
+              Authenticator, 1Password ou outro app TOTP. Se preferir, use a
+              chave manual.
+            </p>
+            <img
+              id="mfa-qr"
+              class="mfa-qr"
+              alt="QR Code para configurar autenticação em duas etapas"
+            />
+            <label class="field"
+              ><span>Chave manual</span><input id="mfa-secret" readonly
+            /></label>
+            <form id="mfa-enroll-form">
+              <label class="field"
+                ><span>Código de 6 dígitos</span
+                ><input
+                  name="code"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  maxlength="6"
+                  pattern="[0-9]{6}"
+                  required
+              /></label>
+              <button class="button button-primary" type="submit">
+                Confirmar e ativar
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="subsection account-danger-zone">
+          <strong>Excluir conta e dados</strong>
+          <p class="helper">
+            A exclusão remove projetos, tarefas, cronômetros, perfil e a
+            identidade de autenticação de forma permanente.
+          </p>
+          <label class="field"
+            ><span>Digite EXCLUIR MINHA CONTA para confirmar</span
+            ><input id="delete-account-confirmation" autocomplete="off"
+          /></label>
+          <button
+            class="button button-danger"
+            id="delete-account-button"
+            type="button"
+          >
+            Excluir minha conta
+          </button>
+        </div>
+
+        <div class="subsection account-danger-zone">
+          <strong>Sessão</strong>
+          <p class="helper">
+            Ao sair, seus dados permanecem na nuvem e só voltam a ser carregados
+            depois de uma nova autenticação.
+          </p>
+          <button
+            class="button button-danger"
+            id="sign-out-button"
+            type="button"
+          >
+            Sair da conta
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="recovery-dialog" class="dialog">
+      <form id="recovery-form" class="dialog-card compact-dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Recuperação</p>
+            <h2>Crie uma nova senha</h2>
+          </div>
+        </div>
+        <p class="helper">
+          O link de recuperação foi validado. Defina uma nova senha forte para
+          sua conta.
+        </p>
+        <label class="field"
+          ><span>Nova senha</span
+          ><input
+            type="password"
+            name="password"
+            autocomplete="new-password"
+            minlength="12"
+            required
+        /></label>
+        <label class="field"
+          ><span>Confirmar senha</span
+          ><input
+            type="password"
+            name="confirmPassword"
+            autocomplete="new-password"
+            minlength="12"
+            required
+        /></label>
+        <div
+          id="recovery-message"
+          class="auth-message"
+          aria-live="polite"
+        ></div>
+        <div class="dialog-actions">
+          <button class="button button-primary" type="submit">
+            Salvar nova senha
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div
+      id="toast-region"
+      class="toast-region"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

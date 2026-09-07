@@ -26,8 +26,8 @@ Aplicação acadêmica em **HTML, CSS e JavaScript puro** com **Supabase Auth + 
 - importação/exportação JSON validada antes de entrar no estado.
 
 ---
-
-# O que você precisa configurar
+# Auxilio da IA para organização e configuração das necessidades do APP
+Etapa crucial de documentar e colocar abaixo para entender o que fiz e por quê eu fiz.
 
 ## 1. Criar um projeto no Supabase
 

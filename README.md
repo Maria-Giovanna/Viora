@@ -315,14 +315,3 @@ Tarefas bloqueadas possuem:
 - controles desabilitados;
 - motivo textual do bloqueio.
 
-## Testes
-
-```bash
-node tests.mjs
-```
-
-Esperado:
-
-```text
-Todos os testes passaram.
-```
